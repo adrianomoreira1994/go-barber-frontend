@@ -1,6 +1,8 @@
-import React, { useRef, useCallback, useContext } from 'react';
+import React, { useRef, useCallback } from 'react';
+
 import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
 import * as Yup from 'yup';
+
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 
@@ -10,7 +12,10 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import { Container, Content, Background } from './styles';
-import { useAuth } from '../../hooks/AuthContext';
+
+import { useAuth } from '../../hooks/auth';
+import { useToast } from '../../hooks/toast';
+
 import getValidationErrors from '../../utils/getValidationErrors';
 
 interface SignInFormData {
@@ -20,8 +25,7 @@ interface SignInFormData {
 
 const SignIn: React.FC = () => {
   const { user, signIn } = useAuth();
-
-  console.log(user);
+  const { addToast } = useToast();
 
   const formRef = useRef<FormHandles>(null);
   const handleSubmit = useCallback(
@@ -40,7 +44,7 @@ const SignIn: React.FC = () => {
           abortEarly: false,
         });
 
-        signIn({
+        await signIn({
           email: data.email,
           password: data.password,
         });
@@ -50,7 +54,7 @@ const SignIn: React.FC = () => {
           formRef.current?.setErrors(errors);
         }
 
-        // disparar um toast
+        addToast();
       }
     },
     [signIn],
