@@ -10,15 +10,22 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import { Container, Content, Background } from './styles';
-import { AuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/AuthContext';
 import getValidationErrors from '../../utils/getValidationErrors';
 
+interface SignInFormData {
+  email: string;
+  password: string;
+}
+
 const SignIn: React.FC = () => {
-  const { name, signIn } = useContext(AuthContext);
+  const { user, signIn } = useAuth();
+
+  console.log(user);
 
   const formRef = useRef<FormHandles>(null);
   const handleSubmit = useCallback(
-    async (data: object) => {
+    async (data: SignInFormData) => {
       try {
         formRef.current?.setErrors({});
 
@@ -33,10 +40,17 @@ const SignIn: React.FC = () => {
           abortEarly: false,
         });
 
-        signIn();
+        signIn({
+          email: data.email,
+          password: data.password,
+        });
       } catch (err) {
-        const errors = getValidationErrors(err);
-        formRef.current?.setErrors(errors);
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+        }
+
+        // disparar um toast
       }
     },
     [signIn],
@@ -45,7 +59,6 @@ const SignIn: React.FC = () => {
   return (
     <Container>
       <Content>
-        <h1>{name}</h1>
         <img src={logoImg} alt="GoBarber" />
 
         <Form ref={formRef} onSubmit={handleSubmit}>
